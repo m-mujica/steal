@@ -1750,35 +1750,37 @@ function logloads(loads) {
   }
   // 15.2.5.2.2
   function addLoadToLinkSet(linkSet, load) {
-    console.assert(load.status == 'loading' || load.status == 'loaded', 'loading or loaded on link set');
+    console.assert(
+      load.status == "loading" || load.status == "loaded",
+      "loading or loaded on link set"
+    );
 
     for (var i = 0, l = linkSet.loads.length; i < l; i++)
-      if (linkSet.loads[i] == load)
-        return;
+      if (linkSet.loads[i] == load) return;
 
     linkSet.loads.push(load);
     linkSet.loads[load.name] = true;
     load.linkSets.push(linkSet);
 
     // adjustment, see https://bugs.ecmascript.org/show_bug.cgi?id=2603
-    if (load.status != 'loaded') {
+    if (load.status != "loaded") {
       linkSet.loadingCount++;
     }
 
     var loader = linkSet.loader;
 
     for (var i = 0, l = load.dependencies.length; i < l; i++) {
-      var name = load.dependencies[i].value;
+      if (load.dependencies[i]) {
+        var name = load.dependencies[i].value;
 
-      if (loader.modules[name])
-        continue;
+        if (loader.modules[name]) continue;
 
-      for (var j = 0, d = loader.loads.length; j < d; j++) {
-        if (loader.loads[j].name != name)
-          continue;
+        for (var j = 0, d = loader.loads.length; j < d; j++) {
+          if (loader.loads[j].name != name) continue;
 
-        addLoadToLinkSet(linkSet, loader.loads[j]);
-        break;
+          addLoadToLinkSet(linkSet, loader.loads[j]);
+          break;
+        }
       }
     }
     // console.log('add to linkset ' + load.name);
